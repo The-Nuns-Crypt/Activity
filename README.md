@@ -1,2 +1,6 @@
-# Activity
-Created to log staffs in game activity
+# Activity Tracking System
+
+---
+
+### Developed By
+**Ayden**
