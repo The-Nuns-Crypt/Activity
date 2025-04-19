@@ -4,9 +4,9 @@
   "description": "Created to log staffs in game activity",
   "type": "module",
   "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+"scripts": {
+  "start": "node src/server.js"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
