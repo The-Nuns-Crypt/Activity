@@ -71,7 +71,7 @@ export function startAPI(client) {
       await db.query(`
         INSERT INTO "shift data" (username, roblox_userid, rank, start_time, all_time)
         VALUES ($1, $2, $3, $4, 0)
-      `, [username, roblox_userid, rank || 'Unknown', start_time])      
+      `, [username, roblox_userid, rank || 'Unknown', start_time])
 
       return res.status(200).json({ success: true })
     } catch (err) {
@@ -90,17 +90,19 @@ export function startAPI(client) {
 
     try {
       const result = await db.query(`
-        SELECT id, start_time, all_time FROM "shift data"
+        SELECT id, username, rank, start_time, all_time FROM "shift data"
         WHERE roblox_userid = $1 AND end_time IS NULL
         ORDER BY id DESC LIMIT 1
-      `, [roblox_userid])      
+      `, [roblox_userid])
 
       if (!result.rows.length)
         return res.status(404).json({ error: 'No active shift found' })
 
-      const { id, start_time, all_time } = result.rows[0]
+      const { id, username, rank, start_time, all_time } = result.rows[0]
       const start = new Date(start_time)
       const duration = Math.floor((end_time - start) / 60000)
+      const newAllTime = all_time + duration
+      const quotaMet = newAllTime >= 60 ? 'true' : 'false'
 
       await db.query(`
         UPDATE "shift data"
@@ -108,8 +110,33 @@ export function startAPI(client) {
             duration_minutes = $2,
             all_time = $3
         WHERE id = $4
-      `, [end_time_str, duration, all_time + duration, id])
-      
+      `, [end_time_str, duration, newAllTime, id])
+
+      const userId = await noblox.getIdFromUsername(username)
+      const avatar = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`
+
+      const embed = client.discord.embed({
+        title: 'Shift Data',
+        color: 0x2f3136,
+        description: [
+          `**Core**`,
+          `Username: \`${username}\``,
+          `Rank: \`${rank || 'Unknown'}\``,
+          ``,
+          `**Session**`,
+          `Start time: \`${start_time}\``,
+          `End time: \`${end_time_str}\``,
+          `Shift: \`${duration}\` minutes`,
+          `All time: \`${newAllTime}\` minutes`,
+          ``,
+          `**Requirements**`,
+          `Weekly quota met: \`${quotaMet}\``
+        ].join('\n')
+      }).setThumbnail(avatar)
+
+      const channel = await client.channels.fetch('1163237752549158912')
+      await channel.send({ embeds: [embed] })
+
       return res.status(200).json({ success: true, duration })
     } catch (err) {
       console.error('[API] endShift error:', err)
