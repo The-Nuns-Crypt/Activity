@@ -82,36 +82,33 @@ export function startAPI(client) {
 
   app.post('/endShift', async (req, res) => {
     const { roblox_userid, afk_minutes = 0, messages_sent = 0 } = req.body
-    if (!roblox_userid)
-      return res.status(400).json({ error: 'Missing roblox_userid' })
-
+    if (!roblox_userid) return res.status(400).json({ error: 'Missing roblox_userid' })
+  
     const end_time = new Date()
     const end_time_str = end_time.toISOString()
-
-    const formatTime = (iso) => {
-      return new Date(iso).toLocaleString('en-US', {
+  
+    const formatTime = (iso) =>
+      new Date(iso).toLocaleString('en-US', {
         dateStyle: 'long',
         timeStyle: 'short',
         timeZone: 'UTC'
       }) + ' UTC'
-    }
-
+  
     try {
       const result = await db.query(`
         SELECT id, username, rank, start_time, all_time FROM "shift data"
         WHERE roblox_userid = $1 AND end_time IS NULL
         ORDER BY id DESC LIMIT 1
       `, [roblox_userid])
-
-      if (!result.rows.length)
-        return res.status(404).json({ error: 'No active shift found' })
-
+  
+      if (!result.rows.length) return res.status(404).json({ error: 'No active shift found' })
+  
       const { id, username, rank, start_time, all_time } = result.rows[0]
       const start = new Date(start_time)
       const duration = Math.floor((end_time - start) / 60000)
       const newAllTime = all_time + duration
       const quotaMet = newAllTime >= 60 ? 'true' : 'false'
-
+  
       await db.query(`
         UPDATE "shift data"
         SET end_time = $1,
@@ -119,10 +116,10 @@ export function startAPI(client) {
             all_time = $3
         WHERE id = $4
       `, [end_time_str, duration, newAllTime, id])
-
+  
       const userId = await noblox.getIdFromUsername(username)
       const avatar = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`
-
+  
       const embed = client.discord.embed({
         title: 'Shift Data',
         color: 0x2f3136,
@@ -145,16 +142,17 @@ export function startAPI(client) {
           `Weekly quota met: \`${quotaMet}\``
         ].join('\n')
       }).setThumbnail(avatar)
-
+  
       const channel = await client.channels.fetch('1163237752549158912')
       await channel.send({ embeds: [embed] })
-
+  
       return res.status(200).json({ success: true, duration })
     } catch (err) {
       console.error('[API] endShift error:', err)
       return res.status(500).json({ error: 'DB error' })
     }
   })
+  
 
   app.listen(PORT, () => {
     console.log(`[API] Running on port ${PORT}`)
