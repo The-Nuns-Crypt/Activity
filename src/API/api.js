@@ -2,7 +2,8 @@ import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
 import noblox from 'noblox.js'
-import { Pool } from 'pg'
+import pkg from 'pg'
+const { Pool } = pkg
 
 export function startAPI(client) {
   const app = express()
