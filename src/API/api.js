@@ -69,9 +69,9 @@ export function startAPI(client) {
 
     try {
       await db.query(`
-        INSERT INTO shift_data (username, roblox_userid, rank, start_time, all_time)
+        INSERT INTO "shift data" (username, roblox_userid, rank, start_time, all_time)
         VALUES ($1, $2, $3, $4, 0)
-      `, [username, roblox_userid, rank || 'Unknown', start_time])
+      `, [username, roblox_userid, rank || 'Unknown', start_time])      
 
       return res.status(200).json({ success: true })
     } catch (err) {
@@ -90,10 +90,10 @@ export function startAPI(client) {
 
     try {
       const result = await db.query(`
-        SELECT id, start_time, all_time FROM shift_data
+        SELECT id, start_time, all_time FROM "shift data"
         WHERE roblox_userid = $1 AND end_time IS NULL
         ORDER BY id DESC LIMIT 1
-      `, [roblox_userid])
+      `, [roblox_userid])      
 
       if (!result.rows.length)
         return res.status(404).json({ error: 'No active shift found' })
@@ -103,13 +103,13 @@ export function startAPI(client) {
       const duration = Math.floor((end_time - start) / 60000)
 
       await db.query(`
-        UPDATE shift_data
+        UPDATE "shift data"
         SET end_time = $1,
             duration_minutes = $2,
             all_time = $3
         WHERE id = $4
       `, [end_time_str, duration, all_time + duration, id])
-
+      
       return res.status(200).json({ success: true, duration })
     } catch (err) {
       console.error('[API] endShift error:', err)
