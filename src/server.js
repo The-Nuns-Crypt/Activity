@@ -19,7 +19,7 @@ const client = new Client({
   ]
 })
 
-await discordHandler(client)
+client.discord = discordHandler
 
 client.once('ready', () => {
   console.clear()
