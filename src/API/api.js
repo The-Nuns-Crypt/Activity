@@ -81,12 +81,20 @@ export function startAPI(client) {
   })
 
   app.post('/endShift', async (req, res) => {
-    const { roblox_userid } = req.body
+    const { roblox_userid, afk_minutes = 0, messages_sent = 0 } = req.body
     if (!roblox_userid)
       return res.status(400).json({ error: 'Missing roblox_userid' })
 
     const end_time = new Date()
     const end_time_str = end_time.toISOString()
+
+    const formatTime = (iso) => {
+      return new Date(iso).toLocaleString('en-US', {
+        dateStyle: 'long',
+        timeStyle: 'short',
+        timeZone: 'UTC'
+      }) + ' UTC'
+    }
 
     try {
       const result = await db.query(`
@@ -124,10 +132,14 @@ export function startAPI(client) {
           `Rank: \`${rank || 'Unknown'}\``,
           ``,
           `**Session**`,
-          `Start time: \`${start_time}\``,
-          `End time: \`${end_time_str}\``,
+          `Start time: \`${formatTime(start_time)}\``,
+          `End time: \`${formatTime(end_time_str)}\``,
           `Shift: \`${duration}\` minutes`,
           `All time: \`${newAllTime}\` minutes`,
+          ``,
+          `**Quality**`,
+          `AFK: \`${afk_minutes}\` minutes`,
+          `Messages sent: \`${messages_sent}\``,
           ``,
           `**Requirements**`,
           `Weekly quota met: \`${quotaMet}\``
