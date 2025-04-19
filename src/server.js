@@ -2,7 +2,7 @@ import { Client, GatewayIntentBits, Partials } from 'discord.js'
 import 'dotenv/config'
 import chalk from 'chalk'
 import { discordHandler } from './handlers/discordHandler.js'
-import './API/api.js'
+import { startAPI } from './API/api.js'
 
 const client = new Client({
   intents: [
@@ -29,6 +29,8 @@ client.once('ready', () => {
     activities: [{ name: 'coded by ayden', type: 2 }],
     status: 'dnd'
   })
+
+  startAPI(client)
 })
 
 client.login(process.env.TOKEN)
