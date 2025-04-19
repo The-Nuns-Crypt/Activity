@@ -1,6 +1,6 @@
 import { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js'
 
-export const DiscordHandler = {
+export const discordHandler = {
   embed({ title, description, color = 0x2f3136, footer }) {
     const embed = new EmbedBuilder().setColor(color)
     if (title) embed.setTitle(title)
