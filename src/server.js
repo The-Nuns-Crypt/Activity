@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits, Partials } from 'discord.js'
 import 'dotenv/config'
 import chalk from 'chalk'
+
 import { discordHandler } from './handlers/discordHandler.js'
 import { startAPI } from './API/api.js'
 
